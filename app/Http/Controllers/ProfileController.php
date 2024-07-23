@@ -1,42 +1,75 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-
-    public function edit(Request $request): View
+    /**
+     * Display the specified user profile.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function show(Request $request): JsonResponse
     {
-        return view('profile.edit', [
+        return response()->json([
             'user' => $request->user(),
         ]);
     }
 
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    /**
+     * Update the authenticated user's profile.
+     *
+     * @param ProfileUpdateRequest $request
+     * @return JsonResponse
+     */
+    public function update(ProfileUpdateRequest $request): JsonResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($request->validated());
+
+        if ($request->has('password')) {
+            $user->password = Hash::make($request->input('password'));
         }
 
-        $request->user()->save();
+        if ($request->has('email') && $user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user,
+        ]);
     }
 
-    public function destroy(Request $request): RedirectResponse
+    /**
+     * Delete the authenticated user account.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function destroy(Request $request): JsonResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current-password'],
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'string', 'current_password'],
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()->first(),
+            ], 422);
+        }
 
         $user = $request->user();
 
@@ -47,6 +80,8 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return response()->json([
+            'message' => 'User account deleted successfully',
+        ]);
     }
 }
