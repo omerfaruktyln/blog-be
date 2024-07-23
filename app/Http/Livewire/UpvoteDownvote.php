@@ -23,10 +23,6 @@ class UpvoteDownvote extends Component
         $downvotes = \App\Models\UpvoteDownvote::where('post_id', '=', $this->post->id)
             ->where('is_upvote', false)
             ->count();
-
-        // The status whether current user has upvoted the post or not.
-        // This will be null, true, or false
-        // null means user has not done upvote or downvote
         $hasUpvote = null;
 
         /** @var \App\Models\User $user */

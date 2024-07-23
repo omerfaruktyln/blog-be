@@ -14,13 +14,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class PostController extends Controller
 {
 
-    /**
-     * Display a listing of the resource.
-     */
+
     public function home()
     {
         
-        // Latest post
+        // Son gönderiler
         $latestPost = Post::where('active', '=', 1)
             ->whereDate('published_at', '<', Carbon::now())
             ->orderBy('published_at', 'desc')
@@ -29,7 +27,7 @@ class PostController extends Controller
 
 
 
-        // Show the most popular 3 posts based on upvotes
+        // Beğenilere göre en popüler 3 gönderiyi göster
         $popularPosts = Post::query()
             ->leftJoin('upvote_downvotes', 'posts.id', '=', 'upvote_downvotes.post_id')
             ->select('posts.*', DB::raw('COUNT(upvote_downvotes.id) as upvote_count'))
@@ -84,7 +82,7 @@ class PostController extends Controller
         
 
 
-        // Show recent categories with their latest posts
+        // En son kategorileri en son gönderileriyle birlikte göster
         $categories = Category::query()
 //            ->with(['posts' => function ($query) {
 //                $query->orderByDesc('published_at');
@@ -118,10 +116,6 @@ class PostController extends Controller
     
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         $postData = $request->input('post');
