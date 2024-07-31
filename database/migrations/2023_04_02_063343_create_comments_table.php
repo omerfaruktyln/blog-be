@@ -16,6 +16,8 @@ return new class extends Migration
             $table->longText('comment');
             $table->foreignId('post_id')->constrained();
             $table->foreignId('user_id')->constrained();
+            $table->foreignId('parent_id')->nullable()->constrained('comments'); // Alt yorumlar için parent_id
+            $table->boolean('is_approved')->default(false); // Onay durumu
             $table->timestamps();
         });
     }

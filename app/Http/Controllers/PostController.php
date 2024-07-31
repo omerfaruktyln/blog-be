@@ -124,7 +124,7 @@ class PostController extends Controller
         $next = Post::query()
             ->where('active', true)
             ->whereDate('published_at', '<=', Carbon::now())
-            ->whereDate('published_at', '<', $post->published_at)
+            ->whereDate('published_at', '<=', $post->published_at)
             ->orderBy('published_at', 'desc')
             ->limit(1)
             ->first();
@@ -132,7 +132,7 @@ class PostController extends Controller
         $prev = Post::query()
             ->where('active', true)
             ->whereDate('published_at', '<=', Carbon::now())
-            ->whereDate('published_at', '>', $post->published_at)
+            ->whereDate('published_at', '>=', $post->published_at)
             ->orderBy('published_at', 'asc')
             ->limit(1)
             ->first();
